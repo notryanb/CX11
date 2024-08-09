@@ -121,6 +121,48 @@ void CX11SynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
     buffer.clear(i, 0, buffer.getNumSamples());
   }
 
+  splitBufferByEvents(buffer, midiMessages);
+}
+
+void CX11SynthAudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
+  int bufferOffset = 0;
+
+  for (const auto metadata : midiMessages) {
+
+    // Render audio that happens before this event
+    int samplesThisSegment = metadata.samplePosition - bufferOffset;
+
+    if (samplesThisSegment > 0) {
+      render(buffer, samplesThisSegment, bufferOffset);
+      bufferOffset += samplesThisSegment;
+    }
+
+    // Handle the event and ignore some MIDI messages
+    if (metadata.numBytes <= 3) {
+      uint8_t data1 = (metadata.numBytes >= 2) ? metadata.data[1] : 0;
+      uint8_t data2 = (metadata.numBytes == 3) ? metadata.data[2] : 0;
+      handleMIDI(metadata.data[0], data1, data2);
+    }
+  }
+
+  // Render the audio after the last MIDI event. Render the entire buffer
+  // if there were no MIDI events.
+  int samplesLastSegment = buffer.getNumSamples() - bufferOffset;
+  if (samplesLastSegment > 0) {
+    render(buffer, samplesLastSegment, bufferOffset);
+  }
+
+  midiMessages.clear();
+}
+
+void CX11SynthAudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2) {
+  char s[16];
+  snprintf(s, 16, "%02hhX %02hhX %02hhX", data0, data1, data2);
+  DBG(s);
+}
+
+void CX11SynthAudioProcessor::render(juce::AudioBuffer<float>& buffer, int sampleCount, int bufferOffset) {
+  // don't do anything yet...
 }
 
 bool CX11SynthAudioProcessor::hasEditor() const {
