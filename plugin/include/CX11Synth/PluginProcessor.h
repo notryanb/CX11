@@ -1,6 +1,7 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include "Synth.h"
 
 namespace audio_plugin {
 class CX11SynthAudioProcessor : public juce::AudioProcessor {
@@ -10,6 +11,7 @@ public:
 
   void prepareToPlay(double sampleRate, int samplesPerBlock) override;
   void releaseResources() override;
+  void reset() override;
 
   bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
 
@@ -35,6 +37,8 @@ public:
   void getStateInformation(juce::MemoryBlock& destData) override;
   void setStateInformation(const void* data, int sizeInBytes) override;
 private:
+  Synth synth;
+
   void splitBufferByEvents(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
   void handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2);
   void render(juce::AudioBuffer<float>& buffer, int sampleCount, int bufferOffset);

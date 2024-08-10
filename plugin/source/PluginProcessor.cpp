@@ -75,15 +75,16 @@ void CX11SynthAudioProcessor::changeProgramName(
 }
 
 void CX11SynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
-  // Use this method as the place to do any pre-playback
-  // initialisation that you need..
-  juce::ignoreUnused(sampleRate, samplesPerBlock);
-
+  synth.allocate_resources(sampleRate, samplesPerBlock);
+  reset();
 }
 
 void CX11SynthAudioProcessor::releaseResources() {
-  // When playback stops, you can use this as an opportunity to free up any
-  // spare memory, etc.
+  synth.deallocate_resources();
+}
+
+void CX11SynthAudioProcessor::reset() {
+  synth.reset();
 }
 
 bool CX11SynthAudioProcessor::isBusesLayoutSupported(
@@ -111,11 +112,11 @@ bool CX11SynthAudioProcessor::isBusesLayoutSupported(
 }
 
 void CX11SynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
-  juce::ignoreUnused(midiMessages);
+  //juce::ignoreUnused(midiMessages);
   juce::ScopedNoDenormals noDenormals;
 
   auto totalNumInputChannels = getTotalNumInputChannels();
-  auto totalNumOutputChannels = getTotalNumOutputChannels();
+  //auto totalNumOutputChannels = getTotalNumOutputChannels();
 
   for (auto i = totalNumInputChannels; i < totalNumInputChannels; ++i) {
     buffer.clear(i, 0, buffer.getNumSamples());
@@ -156,13 +157,18 @@ void CX11SynthAudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buff
 }
 
 void CX11SynthAudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2) {
-  char s[16];
-  snprintf(s, 16, "%02hhX %02hhX %02hhX", data0, data1, data2);
-  DBG(s);
+  synth.midi_message(data0, data1, data2);
 }
 
-void CX11SynthAudioProcessor::render(juce::AudioBuffer<float>& buffer, int sampleCount, int bufferOffset) {
-  // don't do anything yet...
+void CX11SynthAudioProcessor::render(juce::AudioBuffer<float>& buffer, int sampleCount , int bufferOffset) {
+  float* output_buffers[2] = { nullptr, nullptr };
+  output_buffers[0] = buffer.getWritePointer(0) + bufferOffset;
+
+  if (getTotalNumOutputChannels() > 1) {
+    output_buffers[1] = buffer.getWritePointer(1) + bufferOffset;
+  }
+
+  synth.render(output_buffers, sampleCount);
 }
 
 bool CX11SynthAudioProcessor::hasEditor() const {
@@ -196,4 +202,5 @@ void CX11SynthAudioProcessor::setStateInformation(
 // This function definition must be in the global namespace.
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
   return new audio_plugin::CX11SynthAudioProcessor();
+  //return new CX11SynthAudioProcessor();
 }

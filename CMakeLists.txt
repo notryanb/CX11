@@ -8,12 +8,7 @@ cmake_minimum_required(VERSION 3.22)
 # Sets a few variables, like PROJECT_NAME
 project(CX11Synth)
 
-# Always use the newest C++ standard on green-field projects if possible.
-set(CMAKE_CXX_STANDARD 23)
-if (APPLE)
-    # On Mac, we need to wait for a new JUCE version that fixes the compilation issue
-    set(CMAKE_CXX_STANDARD 20)
-endif()
+set(CMAKE_CXX_STANDARD 17)
 
 # I like to download the dependencies to the same folder as the project.
 # If you want to install them system wide, set CPM_SOURCE_CACHE with the path to the dependencies
