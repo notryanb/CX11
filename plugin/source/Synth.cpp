@@ -1,4 +1,5 @@
 #include "CX11Synth/Synth.h"
+#include "CX11Synth/Utils.h"
 
 //namespace audio_plugin {
 Synth::Synth() {
@@ -36,6 +37,9 @@ void Synth::render(float** output_buffers, int sample_count) {
             output_buffer_right[sample] = output;
         }
     }
+
+    protectYourEars(output_buffer_left, sample_count);
+    protectYourEars(output_buffer_right, sample_count);
 }
 
 void Synth::midi_message(uint8_t data0, uint8_t data1, uint8_t data2) {
