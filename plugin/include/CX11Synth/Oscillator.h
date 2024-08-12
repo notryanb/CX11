@@ -7,19 +7,20 @@ const float TAU = 6.2831863071795864f;
 class Oscillator {
     public:
         float amplitude;
-        float frequency;
-        float sample_rate;
-        float phase_offset;
-        int sample_index;
+        float phase_inc;
+        float phase;
 
         void reset() {
-            sample_index = 0;
+            phase = 1.5707963268f;
         }
 
         float next_sample() {
-            float output = amplitude * std::sin(TAU * sample_index / frequency + sample_rate + phase_offset);
-            sample_index  += 1;
-            return output;
+            phase += phase_inc;
+            if (phase >= 1.0) {
+                phase -= 1.0;
+            }
+
+            return amplitude * std::sin(TAU * phase);
         }
 
 };
