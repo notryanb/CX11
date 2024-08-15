@@ -19,33 +19,10 @@ class Oscillator {
             phase_inc = 0.0f;
             phase = 0.0f;
 
-            // Digitial Sine Resonator
-            // phase = 1.5707963268f;
-            // sin0 = amplitude * std::sin(TAU * phase);
-            // sin1 = amplitude * std::sin(TAU * (phase - phase_inc));
-            // dsin = 2.0f * std::cos(TAU * phase_inc);
+            sin0 = 0.0f;
+            sin1 = 0.0f;
+            dsin = 0.0f;
         }
-
-        // float next_band_limited_sample() {
-        //     phase_bl += phase_inc;
-        //     if (phase_bl >= 1.0f) {
-        //         phase_bl -= 1.0f;
-        //     }
-
-        //     float output = 0.0f;
-        //     float nyquist = sample_rate / 2.0f;
-        //     float h = freq;
-        //     float i = 1.0f;
-        //     float m = 0.6366197724f; // 2 / PI
-        //     while (h < nyquist) {
-        //         output += m * std::sin(TAU * phase_bl * i) / i;
-        //         h += freq;
-        //         i += 1.0f;
-        //         m = -m;
-        //     }
-
-        //     return output;
-        // }
 
         float next_sample() {
             // BLIT = Bandlimited Impulse Train
@@ -63,11 +40,17 @@ class Oscillator {
                 phase_inc = phase_max / half_period;
                 phase = -phase;
 
+                // Digitial Sine Resonator
+                sin0 = amplitude * std::sin(phase);
+                sin1 = amplitude * std::sin(phase - phase_inc);
+                dsin = 2.0f * std::cos(phase_inc);
+
                 // make sure to handle sin(0)/0. Use a very small number here.
                 // Take the square of the phase because the phase can be a very small negative number.
                 // In either +- case, we default to the amplitude.
+
                 if (phase * phase > 1e-9) { 
-                    output = amplitude * std::sin(phase) / phase;
+                    output = sin0 / phase;
                 } else {
                     output = amplitude;
                 }
@@ -78,25 +61,26 @@ class Oscillator {
                     phase_inc = -phase_inc;
                 }
 
-                output = amplitude * std::sin(phase) / phase;
+                // Digitial Sine Resonator
+                float sinp = dsin * sin0 - sin1;
+                sin1 = sin0;
+                sin0 = sinp;
+
+                output = sinp / phase;
             }
 
             return output;
-
-
-            // Digitial Sine Resonator
-            // float sinx = dsin * sin0 - sin1;
-            // sin1 = sin0;
-            // sin0 = sinx;
-            // return sinx;
         }
 
     private:
+        // BLIT
         float phase; // measured in samples * PI
         float phase_max;
         float phase_inc;
-        // float sin0;
-        // float sin1;
-        // float dsin;
+
+        // Digital Sine Resonator
+        float sin0;
+        float sin1;
+        float dsin;
 
 };
