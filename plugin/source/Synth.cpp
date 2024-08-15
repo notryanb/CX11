@@ -64,10 +64,11 @@ void Synth::midi_message(uint8_t data0, uint8_t data1, uint8_t data2) {
 void Synth::noteOn(int note, int velocity) {
     voice.note = note;
 
+    // Converts midi note to frequency
     float frequency = 440.0f * std::exp2(float(note - 69) / 12.0f);
 
     voice.osc.amplitude = (velocity / 127.0f) * 0.5f;
-    voice.osc.phase_inc = frequency / sample_rate;
+    voice.osc.period = sample_rate / frequency;
     voice.osc.reset();
 }
 

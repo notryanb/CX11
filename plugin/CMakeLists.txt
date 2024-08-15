@@ -12,7 +12,7 @@ juce_add_plugin(${PROJECT_NAME}
     COMPANY_NAME RyanSoft # change this
     IS_SYNTH TRUE # may change this
     NEEDS_MIDI_INPUT TRUE # may change this
-    NEEDS_MIDI_OUTPUT FALSE # may change this
+    NEEDS_MIDI_OUTPUT TRUE # may change this
     PLUGIN_MANUFACTURER_CODE RYST # change this
     PLUGIN_CODE EXPL # change this
     FORMATS Standalone VST3 # may change this
