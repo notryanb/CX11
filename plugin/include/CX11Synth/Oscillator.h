@@ -18,6 +18,7 @@ class Oscillator {
         void reset() {
             phase_inc = 0.0f;
             phase = 0.0f;
+            dc_offset = 0.0f;
 
             sin0 = 0.0f;
             sin1 = 0.0f;
@@ -35,6 +36,7 @@ class Oscillator {
                 // Ignores period changes until next cycle.
                 float half_period = period / 2.0f;
                 phase_max = std::floor(0.5f + half_period) - 0.5f;
+                dc_offset  = 0.5f * amplitude / phase_max;
                 phase_max *= PI;
 
                 phase_inc = phase_max / half_period;
@@ -69,7 +71,7 @@ class Oscillator {
                 output = sinp / phase;
             }
 
-            return output;
+            return output - dc_offset;
         }
 
     private:
@@ -77,6 +79,7 @@ class Oscillator {
         float phase; // measured in samples * PI
         float phase_max;
         float phase_inc;
+        float dc_offset;
 
         // Digital Sine Resonator
         float sin0;
