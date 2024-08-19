@@ -176,7 +176,9 @@ bool CX11SynthAudioProcessor::hasEditor() const {
 }
 
 juce::AudioProcessorEditor* CX11SynthAudioProcessor::createEditor() {
-  return new CX11SynthAudioProcessorEditor(*this);
+  auto editor =new juce::GenericAudioProcessorEditor(*this);
+  editor->setSize(500, 1050);
+  return editor;
 }
 
 void CX11SynthAudioProcessor::getStateInformation(
@@ -196,6 +198,28 @@ void CX11SynthAudioProcessor::setStateInformation(
   // call.
   juce::ignoreUnused(data, sizeInBytes);
 }
+
+juce::AudioProcessorValueTreeState::ParameterLayout CX11SynthAudioProcessor::createParameterLayout() {
+  juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+  layout.add(std::make_unique<juce::AudioParameterChoice>(
+    ParameterId::poly_mode,
+    "Polyphony",
+    juce::StringArray { "Mono", "Poly" },
+    1
+  ));
+
+  layout.add(std::make_unique<juce::AudioParameterFloat>(
+    ParameterId::osc_tune,
+    "Osc Tune",
+    juce::NormalisableRange<float>(-24.0f, 24.0f, 1.0f),
+    -12.0f,
+    juce::AudioParameterFloatAttributes().withLabel("semi")
+  ));
+
+  return layout;
+}
+
 }  // namespace audio_plugin
 
 // This creates new instances of the plugin.
