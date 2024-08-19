@@ -1,5 +1,6 @@
 #include "CX11Synth/PluginProcessor.h"
 #include "CX11Synth/PluginEditor.h"
+#include "CX11Synth/Utils.h"
 
 namespace audio_plugin {
 CX11SynthAudioProcessor::CX11SynthAudioProcessor()
@@ -11,10 +12,40 @@ CX11SynthAudioProcessor::CX11SynthAudioProcessor()
 #endif
               .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-      ) {
+) {
+  castParameter(apvts, ParameterId::osc_mix, osc_mix_param);
+  castParameter(apvts, ParameterId::osc_tune, osc_tune_param);
+  castParameter(apvts, ParameterId::osc_fine, osc_fine_param);
+  castParameter(apvts, ParameterId::glide_mode, glide_mode_param);
+  castParameter(apvts, ParameterId::glide_rate, glide_rate_param);
+  castParameter(apvts, ParameterId::glide_bend, glide_bend_param);
+  castParameter(apvts, ParameterId::filter_freq, filter_freq_param);
+  castParameter(apvts, ParameterId::filter_reso, filter_reso_param);
+  castParameter(apvts, ParameterId::filter_env, filter_env_param);
+  castParameter(apvts, ParameterId::filter_lfo, filter_lfo_param);
+  castParameter(apvts, ParameterId::filter_velocity, filter_velocity_param);
+  castParameter(apvts, ParameterId::filter_attack, filter_attack_param);
+  castParameter(apvts, ParameterId::filter_decay, filter_decay_param);
+  castParameter(apvts, ParameterId::filter_sustain, filter_sustain_param);
+  castParameter(apvts, ParameterId::filter_release, filter_release_param);
+  castParameter(apvts, ParameterId::env_attack, env_attack_param);
+  castParameter(apvts, ParameterId::env_decay, env_decay_param);
+  castParameter(apvts, ParameterId::env_sustain, env_sustain_param);
+  castParameter(apvts, ParameterId::env_release, env_release_param);
+  castParameter(apvts, ParameterId::lfo_rate, lfo_rate_param);
+  castParameter(apvts, ParameterId::vibrato, vibrato_param);
+  castParameter(apvts, ParameterId::noise, noise_param);
+  castParameter(apvts, ParameterId::octave, octave_param);
+  castParameter(apvts, ParameterId::tuning, tuning_param);
+  castParameter(apvts, ParameterId::output_level, output_level_param);
+  castParameter(apvts, ParameterId::poly_mode, poly_mode_param);
+
+  apvts.state.addListener(this);
 }
 
-CX11SynthAudioProcessor::~CX11SynthAudioProcessor() {}
+CX11SynthAudioProcessor::~CX11SynthAudioProcessor() {
+  apvts.state.removeListener(this);
+}
 
 const juce::String CX11SynthAudioProcessor::getName() const {
   return JucePlugin_Name;
@@ -76,6 +107,7 @@ void CX11SynthAudioProcessor::changeProgramName(
 
 void CX11SynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
   synth.allocate_resources(sampleRate, samplesPerBlock);
+  parametersChanged.store(true); // force update the first time process block is called so the state is initialized.
   reset();
 }
 
@@ -115,17 +147,16 @@ void CX11SynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
   //juce::ignoreUnused(midiMessages);
   juce::ScopedNoDenormals noDenormals;
 
-  // Read parameters
-  const juce::String& paramId = ParameterId::noise.getParamID();
-  float noise_mix = apvts.getRawParameterValue(paramId)->load() / 100.0f;
-  noise_mix *= noise_mix;
-  synth.noise_mix = noise_mix * 0.06f;
-
   auto totalNumInputChannels = getTotalNumInputChannels();
   //auto totalNumOutputChannels = getTotalNumOutputChannels();
 
   for (auto i = totalNumInputChannels; i < totalNumInputChannels; ++i) {
     buffer.clear(i, 0, buffer.getNumSamples());
+  }
+
+  bool expected = true;
+  if (isNonRealtime() || parametersChanged.compare_exchange_strong(expected, false)) {
+    update();
   }
 
   splitBufferByEvents(buffer, midiMessages);
@@ -160,6 +191,12 @@ void CX11SynthAudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buff
   }
 
   midiMessages.clear();
+}
+
+void CX11SynthAudioProcessor::update() {
+  float noise_mix = noise_param->get() / 100.0f;
+  noise_mix *= noise_mix;
+  synth.noise_mix = noise_mix * 0.06f;
 }
 
 void CX11SynthAudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2) {

@@ -37,7 +37,8 @@ namespace ParameterId {
 }
 
 namespace audio_plugin {
-  class CX11SynthAudioProcessor : public juce::AudioProcessor {
+  class CX11SynthAudioProcessor : public juce::AudioProcessor,
+                                  private juce::ValueTree::Listener {
   public:
       juce::AudioProcessorValueTreeState apvts { *this, nullptr, "Parameters", createParameterLayout() };
 
@@ -74,6 +75,8 @@ namespace audio_plugin {
   private:
       Synth synth;
 
+      std::atomic<bool> parametersChanged { false };
+
       juce::AudioParameterFloat* osc_mix_param;
       juce::AudioParameterFloat* osc_tune_param;
       juce::AudioParameterFloat* osc_fine_param;
@@ -83,7 +86,7 @@ namespace audio_plugin {
       juce::AudioParameterFloat* filter_freq_param;
       juce::AudioParameterFloat* filter_reso_param;
       juce::AudioParameterFloat* filter_env_param;
-      juce::AudioParameterFloat* filter_lfoParam;
+      juce::AudioParameterFloat* filter_lfo_param;
       juce::AudioParameterFloat* filter_velocity_param;
       juce::AudioParameterFloat* filter_attack_param;
       juce::AudioParameterFloat* filter_decay_param;
@@ -102,9 +105,14 @@ namespace audio_plugin {
       juce::AudioParameterChoice* poly_mode_param;
 
       juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+      void update();
       void splitBufferByEvents(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
       void handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2);
       void render(juce::AudioBuffer<float>& buffer, int sampleCount, int bufferOffset);
+
+      void valueTreePropertyChanged(juce::ValueTree&, const juce::Identifier&) override {
+        parametersChanged.store(true);
+      }
 
       JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CX11SynthAudioProcessor)
   };
