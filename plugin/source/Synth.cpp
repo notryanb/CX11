@@ -23,12 +23,11 @@ void Synth::render(float** output_buffers, int sample_count) {
     float* output_buffer_right = output_buffers[1];
 
     for (int sample = 0; sample < sample_count; ++sample) {
-        //float noise = noise_gen.next_value();
+        float noise = noise_gen.next_value() * noise_mix;
 
         float output = 0.0f;
-
         if (voice.note > 0) {
-            output = voice.render();
+            output = voice.render() + noise;
         }
 
         output_buffer_left[sample] = output;

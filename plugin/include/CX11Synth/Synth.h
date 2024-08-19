@@ -10,6 +10,8 @@ class Synth {
     public: 
         Synth();
 
+        float noise_mix;
+
         void allocate_resources(double sample_rate, int /*samples_per_block*/);
         void deallocate_resources();
         void reset();

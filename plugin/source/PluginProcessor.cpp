@@ -115,6 +115,12 @@ void CX11SynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
   //juce::ignoreUnused(midiMessages);
   juce::ScopedNoDenormals noDenormals;
 
+  // Read parameters
+  const juce::String& paramId = ParameterId::noise.getParamID();
+  float noise_mix = apvts.getRawParameterValue(paramId)->load() / 100.0f;
+  noise_mix *= noise_mix;
+  synth.noise_mix = noise_mix * 0.06f;
+
   auto totalNumInputChannels = getTotalNumInputChannels();
   //auto totalNumOutputChannels = getTotalNumOutputChannels();
 
