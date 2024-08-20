@@ -2,6 +2,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "Synth.h"
+#include "Preset.h"
 
 namespace ParameterId {
   #define PARAMETER_ID(str) const juce::ParameterID str(#str, 1);
@@ -76,6 +77,8 @@ namespace audio_plugin {
       Synth synth;
 
       std::atomic<bool> parametersChanged { false };
+      std::vector<Preset> presets;
+      int currentProgram;
 
       juce::AudioParameterFloat* osc_mix_param;
       juce::AudioParameterFloat* osc_tune_param;
@@ -105,6 +108,7 @@ namespace audio_plugin {
       juce::AudioParameterChoice* poly_mode_param;
 
       juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+      void createPrograms();
       void update();
       void splitBufferByEvents(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
       void handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2);
