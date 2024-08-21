@@ -11,6 +11,7 @@ class Synth {
         Synth();
 
         float noise_mix;
+        float env_decay;
 
         void allocate_resources(double sample_rate, int /*samples_per_block*/);
         void deallocate_resources();

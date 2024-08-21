@@ -27,7 +27,7 @@ void Synth::render(float** output_buffers, int sample_count) {
 
         float output = 0.0f;
         if (voice.note > 0) {
-            output = voice.render() + noise;
+            output = voice.render(noise);
         }
 
         output_buffer_left[sample] = output;
@@ -68,6 +68,9 @@ void Synth::noteOn(int note, int velocity) {
 
     voice.osc.amplitude = (velocity / 127.0f) * 0.5f;
     voice.osc.period = sample_rate / frequency;
+    voice.env.level = 1.0f;
+    voice.env.multiplier = env_decay;
+    voice.env.target = 0.2f; // sets sustain to 20%
     voice.osc.reset();
 }
 

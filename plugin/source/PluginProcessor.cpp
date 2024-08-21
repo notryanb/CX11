@@ -289,6 +289,16 @@ void CX11SynthAudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buff
 }
 
 void CX11SynthAudioProcessor::update() {
+  float sample_rate = float(getSampleRate());
+
+  // Need our exp(-x) function to go from 1.0 down to 0.0001 in a certain amount of time.
+  // Figure out the number of samples in the time period (ie. sample count for two seconds at 44.1kHz = 2.0 * 44100)
+  // log is the ln in multiplier  = exp(log(SILENCE) / sample_count)
+  // The decay param is a percentage, so bring it into 0.0..1.0. Dividing by 5.0 means 100% = 5 seconds
+  float decay_time = env_decay_param->get() / 100.0f * 5.0f;
+  float decay_samples = sample_rate * decay_time;
+  synth.env_decay = std::exp(std::log(SILENCE) / decay_samples);
+
   float noise_mix = noise_param->get() / 100.0f;
   noise_mix *= noise_mix;
   synth.noise_mix = noise_mix * 0.06f;
