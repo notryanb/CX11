@@ -14,6 +14,11 @@ struct Voice {
         note = 0;
         saw = 0.0f;
         osc.reset();
+        env.reset();
+    }
+
+    void release() {
+        env.release();
     }
 
     float render(float input) {
@@ -24,5 +29,7 @@ struct Voice {
         float output = saw + input; // mixes in the noise
         float envelope = env.nextValue(); // apply the envlope
         return output * envelope;
+        // output = 0.0f;
+        // return envelope; // DEBUG ENV SHAPE
     }
 };
