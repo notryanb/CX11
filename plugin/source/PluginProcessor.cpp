@@ -296,14 +296,26 @@ void CX11SynthAudioProcessor::update() {
   synth.env_attack = std::exp(-inverse_sample_rate * std::exp(5.5f - 0.075f * env_attack_param->get()));
   synth.env_decay = std::exp(-inverse_sample_rate * std::exp(5.5f - 0.075f * env_decay_param->get()));
   synth.env_sustain = env_sustain_param->get() / 100.0f;
-
   float env_release = env_release_param->get();
+  
   if (env_release < 1.0f) {
-    synth.env_release = 0.75f; // extra fast release
+    synth.env_release = 0.75f; // extra fast release fades out over ~32 samples. 0.75^32 = 0.0001 aka SILENCE
   } else {
     synth.env_release = std::exp(-inverse_sample_rate * std::exp(5.5f - 0.075f * env_release));
   }
 
+  float semi = osc_tune_param->get();
+  float cent = osc_fine_param->get();
+  float octave = octave_param->get();
+  float tuning = tuning_param->get();
+  float tune_in_semi = -36.3763f - 12.0f * octave - tuning / 100.0f;
+  synth.tune = sample_rate * std::exp(0.05776226505f * tune_in_semi);
+
+  // starting pitch is 2^(n/12) where n is the number of fractional semitones. Alternate is 2.0 ^((-semi - 0.01f * cent) / 12.0f)
+  // 1.059463094359f == 2^(1/12)
+  // Using -semi because we specify the oscillator's period and not frequency. Making the period larger decreases the frequency.
+  synth.detune = std::pow(1.059463094359f, -semi - 0.01f * cent);
+  synth.osc_mix = osc_mix_param->get() / 100.0f;
   /*
     OLD DECAY LPF
     // Need our exp(-x) function to go from 1.0 down to 0.0001 in a certain amount of time.

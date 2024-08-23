@@ -15,6 +15,10 @@ class Synth {
         float env_decay;
         float env_sustain;
         float env_release;
+        float osc_mix;
+        float detune;
+        float tune;
+        float pitch_bend;
 
 
         void allocate_resources(double sample_rate, int /*samples_per_block*/);
@@ -30,5 +34,6 @@ class Synth {
 
         void noteOn(int note, int velocity);
         void noteOff(int note);
+        float calcPeriod(int note) const;
 };
 //} // End NameSpace
