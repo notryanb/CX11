@@ -15,7 +15,7 @@ struct Preset {
         float p24, float p25
     )
     {
-        strcpy_s(this->name, name);
+        strcpy(this->name, name);
         param[0] =  p0;     // Osc Mix
         param[1] =  p1;     // Osc Tune
         param[2] =  p2;     // Osc Fine

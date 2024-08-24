@@ -29,15 +29,21 @@ void Synth::render(float** output_buffers, int sample_count) {
     for (int sample = 0; sample < sample_count; ++sample) {
         float noise = noise_gen.next_value() * noise_mix;
 
-        float output = 0.0f;
+        float output_left = 0.0f;
+        float output_right = 0.0f;
+
         if (voice.env.isActive()) {
-            output = voice.render(noise);
+            float output = voice.render(noise);
+            output_left = output * voice.pan_left;
+            output_right = output * voice.pan_right;
         }
 
-        output_buffer_left[sample] = output;
-
         if (output_buffer_right != nullptr) {
-            output_buffer_right[sample] = output;
+            output_buffer_left[sample] = output_left;
+            output_buffer_right[sample] = output_right;
+        } else {
+            
+        output_buffer_left[sample] = (output_left + output_right) * 0.5f;;
         }
     }
 
@@ -72,6 +78,7 @@ void Synth::midi_message(uint8_t data0, uint8_t data1, uint8_t data2) {
 
 void Synth::noteOn(int note, int velocity) {
     voice.note = note;
+    voice.updatePanning();
 
     // Converts midi note to frequency
     float period = calcPeriod(note);

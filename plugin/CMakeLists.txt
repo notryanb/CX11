@@ -60,9 +60,10 @@ target_compile_definitions(${PROJECT_NAME}
 if (MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /Wall /WX)
     # Silences some deprecation warnings that (hopefully) will be fixed in a future release of JUCE.
+    # _CRT_SECURE_NO_WARNINGS is to silence strcpy vs strpy_s
     target_compile_definitions(${PROJECT_NAME}
         PRIVATE
-            _SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING)
+            _SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING _CRT_SECURE_NO_WARNINGS)
 else()
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif()
