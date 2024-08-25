@@ -212,6 +212,7 @@ void CX11SynthAudioProcessor::releaseResources() {
 
 void CX11SynthAudioProcessor::reset() {
   synth.reset();
+  synth.output_level_smoother.setCurrentAndTargetValue(juce::Decibels::decibelsToGain(output_level_param->get()));
 }
 
 bool CX11SynthAudioProcessor::isBusesLayoutSupported(
@@ -243,9 +244,9 @@ void CX11SynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
   juce::ScopedNoDenormals noDenormals;
 
   auto totalNumInputChannels = getTotalNumInputChannels();
-  //auto totalNumOutputChannels = getTotalNumOutputChannels();
+  auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-  for (auto i = totalNumInputChannels; i < totalNumInputChannels; ++i) {
+  for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i) {
     buffer.clear(i, 0, buffer.getNumSamples());
   }
 
@@ -292,6 +293,9 @@ void CX11SynthAudioProcessor::update() {
   float sample_rate = float(getSampleRate());
   float inverse_sample_rate = 1.0f / sample_rate;
 
+  // On AudioParamterChoice data types, the index is the returned value.
+  // Mono = 0, Poly = 1
+
   // 5.5 - 0.075 scales the time
   synth.env_attack = std::exp(-inverse_sample_rate * std::exp(5.5f - 0.075f * env_attack_param->get()));
   synth.env_decay = std::exp(-inverse_sample_rate * std::exp(5.5f - 0.075f * env_decay_param->get()));
@@ -331,6 +335,10 @@ void CX11SynthAudioProcessor::update() {
   float noise_mix = noise_param->get() / 100.0f;
   noise_mix *= noise_mix;
   synth.noise_mix = noise_mix * 0.06f;
+  
+  synth.volume_trim = 0.0008f * (3.2f - synth.osc_mix - 25.0f * synth.noise_mix) * 1.5f;
+  synth.output_level_smoother.setTargetValue(juce::Decibels::decibelsToGain(output_level_param->get()));
+  synth.num_voices = (poly_mode_param->getIndex() == 0) ? 1 : Synth::MAX_VOICES;
 }
 
 void CX11SynthAudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2) {
@@ -641,5 +649,4 @@ layout.add(std::make_unique<juce::AudioParameterFloat>(
 // This function definition must be in the global namespace.
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
   return new audio_plugin::CX11SynthAudioProcessor();
-  //return new CX11SynthAudioProcessor();
 }

@@ -1,5 +1,6 @@
 *.swp
 *.swo
 /build
+/release-build
 /libs
 .vscode

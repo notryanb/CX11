@@ -5,6 +5,7 @@ My Reaper Install: `/Applications/REAPER.app/Contents/MacOS/REAPER`
 ```bash
 $ cmake -S . -B build
 $ cmake --build build
+$ cmake --build build --config Release
 ```
 
 The first run will take the most time because the dependencies (CPM, JUCE, and googletest) need to be downloaded.
