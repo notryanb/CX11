@@ -8,11 +8,17 @@ project(CX11Synth VERSION 0.1.0)
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/CX11Synth")
 
 # Adds a plugin target (that's basically what the Projucer does).
+# https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md
 juce_add_plugin(${PROJECT_NAME}
     COMPANY_NAME RyanSoft # change this
     IS_SYNTH TRUE # may change this
+    IS_MIDI_EFFECT FALSE
     NEEDS_MIDI_INPUT TRUE # may change this
-    NEEDS_MIDI_OUTPUT TRUE # may change this
+    NEEDS_MIDI_OUTPUT FALSE # may change this
+    VST_NUM_MIDI_INS 16
+    VST_NUM_MIDI_OUTS 16
+    VST3_CATEGORIES Instrument Synth
+    #VST3_COPY_DIR The location to which VST3 plugins will be copied after building if COPY_PLUGIN_AFTER_BUILD is set on this target. If you want to install all of the VST3 plugins in a subdirectory to a non-default location, you can set the JUCE_VST3_COPY_DIR property on the directory before adding the plugin targets, rather than setting this argument on each individual target.
     PLUGIN_MANUFACTURER_CODE RYST # change this
     PLUGIN_CODE EXPL # change this
     FORMATS Standalone VST3 # may change this

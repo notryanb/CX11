@@ -308,18 +308,29 @@ void CX11SynthAudioProcessor::update() {
     synth.env_release = std::exp(-inverse_sample_rate * std::exp(5.5f - 0.075f * env_release));
   }
 
+  float noise_mix = noise_param->get() / 100.0f;
+  noise_mix *= noise_mix;
+  synth.noise_mix = noise_mix * 0.06f;
+  
+  synth.osc_mix = osc_mix_param->get() / 100.0f;
+  synth.volume_trim = 0.0008f * (3.2f - synth.osc_mix - 25.0f * synth.noise_mix) * 1.5f;
+
   float semi = osc_tune_param->get();
   float cent = osc_fine_param->get();
+  synth.detune = std::pow(1.059463094359f, -semi - 0.01f * cent);
+  
   float octave = octave_param->get();
   float tuning = tuning_param->get();
   float tune_in_semi = -36.3763f - 12.0f * octave - tuning / 100.0f;
   synth.tune = sample_rate * std::exp(0.05776226505f * tune_in_semi);
 
+  synth.num_voices = (poly_mode_param->getIndex() == 0) ? 1 : Synth::MAX_VOICES;
+  synth.output_level_smoother.setTargetValue(juce::Decibels::decibelsToGain(output_level_param->get()));
+
+
   // starting pitch is 2^(n/12) where n is the number of fractional semitones. Alternate is 2.0 ^((-semi - 0.01f * cent) / 12.0f)
   // 1.059463094359f == 2^(1/12)
   // Using -semi because we specify the oscillator's period and not frequency. Making the period larger decreases the frequency.
-  synth.detune = std::pow(1.059463094359f, -semi - 0.01f * cent);
-  synth.osc_mix = osc_mix_param->get() / 100.0f;
   /*
     OLD DECAY LPF
     // Need our exp(-x) function to go from 1.0 down to 0.0001 in a certain amount of time.
@@ -330,15 +341,7 @@ void CX11SynthAudioProcessor::update() {
     float decay_samples = sample_rate * decay_time;
     synth.env_decay = std::exp(std::log(SILENCE) / decay_samples);
   
-  */
-
-  float noise_mix = noise_param->get() / 100.0f;
-  noise_mix *= noise_mix;
-  synth.noise_mix = noise_mix * 0.06f;
-  
-  synth.volume_trim = 0.0008f * (3.2f - synth.osc_mix - 25.0f * synth.noise_mix) * 1.5f;
-  synth.output_level_smoother.setTargetValue(juce::Decibels::decibelsToGain(output_level_param->get()));
-  synth.num_voices = (poly_mode_param->getIndex() == 0) ? 1 : Synth::MAX_VOICES;
+  */  
 }
 
 void CX11SynthAudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2) {

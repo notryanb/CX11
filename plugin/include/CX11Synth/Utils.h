@@ -2,6 +2,7 @@
 
 
 #include <cmath>
+#include <iostream>
 #include <juce_audio_processors/juce_audio_processors.h> // This is how I'm importing DBG... seems wrong?
 
 inline void protectYourEars(float* buffer, int sample_count)
@@ -13,22 +14,27 @@ inline void protectYourEars(float* buffer, int sample_count)
         bool silence = false;
         if (std::isnan(x)) {
             DBG("!!! WARNING: nan detected in audio buffer, silencing !!!");
+            std::cout << "!!! WARNING: nan detected in audio buffer, silencing !!!\n";
             silence = true;
         } else if (std::isinf(x)) {
             DBG("!!! WARNING: inf detected in audio buffer, silencing !!!");
+            std::cout << "!!! WARNING: inf detected in audio buffer, silencing !!!\n";
             silence = true;
         } else if (x < -2.0f || x > 2.0f) {  // screaming feedback
             DBG("!!! WARNING: sample out of range, silencing !!!");
+            std::cout << "!!! WARNING: sample out of range, silencing !!!\n";
             silence = true;
         } else if (x < -1.0f) {
             if (first_warning) {
                 DBG("!!! WARNING: sample out of range, clamping !!!");
+                std::cout << "!!! WARNING: sample out of range, clamping !!!\n";
                 first_warning = false;
             }
             buffer[i] = -1.0f;
         } else if (x > 1.0f) {
             if (first_warning) {
                 DBG("!!! WARNING: sample out of range, clamping !!!");
+                std::cout << "!!! WARNING: sample out of range, clamping !!!\n";
                 first_warning = false;
             }
             buffer[i] = 1.0f;

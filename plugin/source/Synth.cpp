@@ -1,6 +1,8 @@
 #include "CX11Synth/Synth.h"
 #include "CX11Synth/Utils.h"
 
+
+
 static const float ANALOG = 0.002f;
 static const int SUSTAIN = -1;
 
@@ -17,7 +19,7 @@ void Synth::deallocate_resources() {
 }
 
 void Synth::reset() {
-    for (int v = 0; v < MAX_VOICES; ++v) {
+        for (int v = 0; v < MAX_VOICES; ++v) {
         voices_[v].reset();
     }
 
@@ -48,8 +50,8 @@ void Synth::render(float** output_buffers, int sample_count) {
             Voice& voice = voices_[v];
             if (voice.env.isActive()) {
                 float output = voice.render(noise);
-                output_left = output * voice.pan_left;
-                output_right = output * voice.pan_right;
+                output_left += output * voice.pan_left;
+                output_right += output * voice.pan_right;
             }
         }
 
