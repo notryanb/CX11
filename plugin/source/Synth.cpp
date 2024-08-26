@@ -26,6 +26,7 @@ void Synth::reset() {
     sustained_pedal_pressed = false;
     noise_gen.reset();
     pitch_bend = 1.0f;
+    output_level_smoother.reset(sample_rate, 0.05);
 }
 
 void Synth::render(float** output_buffers, int sample_count) {
@@ -151,7 +152,14 @@ int Synth::findFreeVoice() const {
 void Synth::noteOn(int note, int velocity) {
     int v = 0;
 
-    if (num_voices > 1) { // Polyphonic, num_voices will either be 0 or 8 (MAX_VOICES)
+    if (num_voices == 1) {  // monophonic
+        if (voices_[0].note > 0) { // legato
+            shiftQueuedNotes();
+            restartMonoVoice(note, velocity);
+            return;
+        }
+    } else {
+        // Polyphonic, num_voices will either be 0 or 8 (MAX_VOICES)
         v = findFreeVoice();
     }
 
@@ -159,6 +167,14 @@ void Synth::noteOn(int note, int velocity) {
 }
 
 void Synth::noteOff(int note) {
+    // for Legato playing
+    if ((num_voices == 1) && (voices_[0].note == note)) {
+        int queuedNote = nextQueuedNote();
+        if (queuedNote > 0) {
+            restartMonoVoice(queuedNote, -1);
+        }
+    }
+
     for (int v = 0; v < MAX_VOICES; v++) {
         if (voices_[v].note == note) {
             if (sustained_pedal_pressed) {
@@ -201,5 +217,42 @@ float Synth::calcPeriod(int v, int note) const {
     }
 
     return period;
+}
+
+void Synth::shiftQueuedNotes() {
+    for (int tmp =  MAX_VOICES - 1; tmp > 0; tmp--) {
+        voices_[tmp].note = voices_[tmp - 1].note;
+        voices_[tmp].release();
+    }
+}
+
+int Synth::nextQueuedNote() {
+    int held = 0;
+
+    for (int v = MAX_VOICES - 1; v > 0; v--) {
+        if (voices_[v].note > 0) { held = v; }
+    }
+
+    if (held > 0)  {
+        int note = voices_[held].note;
+        voices_[held].note = 0;
+        return note;
+    }
+
+    return 0;
+}
+
+// In Legato mode, do not restart the envelope or calculate new oscillator amplitudes.
+void Synth::restartMonoVoice(int note, int velocity) {
+    juce::ignoreUnused(velocity);
+
+    float period = calcPeriod(0, note);
+
+    Voice& voice = voices_[0];
+    voice.period = period;
+
+    voice.env.level += SILENCE + SILENCE;
+    voice.note = note;
+    voice.updatePanning();
 }
 //} // End namespace

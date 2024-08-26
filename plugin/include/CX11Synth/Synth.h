@@ -41,6 +41,9 @@ class Synth {
         std::array<Voice, MAX_VOICES> voices_;
         NoiseGenerator noise_gen;
 
+        void shiftQueuedNotes();
+        int nextQueuedNote();
+        void restartMonoVoice(int note, int velocity);
         int findFreeVoice() const;
         void startVoice(int v, int note, int velocity);
         void noteOn(int note, int velocity);
