@@ -329,7 +329,10 @@ void CX11SynthAudioProcessor::update() {
 
   float vibrato = vibrato_param->get() / 200.0f;
   synth.vibrato = 0.2f * vibrato * vibrato;
-  
+
+  synth.pwm_depth = synth.vibrato;
+  if (vibrato < 0.0f) { synth.vibrato = 0.0f; }
+
   float filter_velocity = filter_velocity_param->get();
   if (filter_velocity < -90.0f) {
     synth.velocity_sensitivity = 0.0f;

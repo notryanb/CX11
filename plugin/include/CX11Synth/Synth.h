@@ -30,6 +30,7 @@ class Synth {
         float volume_trim;
         float velocity_sensitivity;
         float vibrato;
+        float pwm_depth;
         bool ignore_velocity;
 
         juce::LinearSmoothedValue<float> output_level_smoother;

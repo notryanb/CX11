@@ -75,6 +75,24 @@ class Oscillator {
             return output - dc_offset;
         }
 
+        void squareWave(Oscillator& other_osc, float new_period) {
+            reset();
+
+            if (other_osc.phase_inc > 0.0f) {
+                phase = other_osc.phase_max + other_osc.phase_max - other_osc.phase;
+                phase_inc = -other_osc.phase_inc;
+            } else if (other_osc.phase_inc < 0.0f) {
+                phase = other_osc.phase;
+                phase_inc = other_osc.phase_inc;
+            } else {
+                phase = -PI;
+                phase_inc = PI;
+            }
+
+            phase += PI * new_period / 2.0f;
+            phase_max = phase;
+        }
+
     private:
         // BLIT
         float phase; // measured in samples * PI
