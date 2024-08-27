@@ -14,7 +14,10 @@ class Synth {
         Synth();
 
         static constexpr int MAX_VOICES = 8;
+        const int LFO_MAX = 32;
+
         int num_voices;
+        float lfo_inc;
         float noise_mix;
         float env_attack;
         float env_decay;
@@ -25,6 +28,10 @@ class Synth {
         float tune;
         float pitch_bend;
         float volume_trim;
+        float velocity_sensitivity;
+        float vibrato;
+        bool ignore_velocity;
+
         juce::LinearSmoothedValue<float> output_level_smoother;
 
         void allocate_resources(double sample_rate, int /*samples_per_block*/);
@@ -36,11 +43,14 @@ class Synth {
 
     private:
         float sample_rate;
+        float lfo_phase;
+        int lfo_step;
         bool sustained_pedal_pressed;
 
         std::array<Voice, MAX_VOICES> voices_;
         NoiseGenerator noise_gen;
 
+        void updateLFO();
         void shiftQueuedNotes();
         int nextQueuedNote();
         void restartMonoVoice(int note, int velocity);

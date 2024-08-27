@@ -10,6 +10,7 @@ class Oscillator {
     public:
         float amplitude = 1.0f;
         float period = 0.0f;
+        float modulation = 1.0f;
 
         // float freq;
         // float sample_rate;
@@ -34,7 +35,7 @@ class Oscillator {
             if (phase <= PI_OVER_4) {
                 // Find midpoint between impulse peaks. If the period is 100 samples, the next midpoint is 50 in the future.
                 // Ignores period changes until next cycle.
-                float half_period = period / 2.0f;
+                float half_period = (period / 2.0f) * modulation;
                 phase_max = std::floor(0.5f + half_period) - 0.5f;
                 dc_offset  = 0.5f * amplitude / phase_max;
                 phase_max *= PI;

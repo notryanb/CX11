@@ -26,6 +26,9 @@ void Synth::reset() {
     sustained_pedal_pressed = false;
     noise_gen.reset();
     pitch_bend = 1.0f;
+    lfo_phase = 0.0f;
+    lfo_step = 0;
+    
     output_level_smoother.reset(sample_rate, 0.05);
 }
 
@@ -42,6 +45,7 @@ void Synth::render(float** output_buffers, int sample_count) {
     }
 
     for (int sample = 0; sample < sample_count; ++sample) {
+        updateLFO();
         float noise = noise_gen.next_value() * noise_mix;
 
         float output_left = 0.0f;
@@ -77,6 +81,28 @@ void Synth::render(float** output_buffers, int sample_count) {
 
     protectYourEars(output_buffer_left, sample_count);
     protectYourEars(output_buffer_right, sample_count);
+}
+
+void Synth::updateLFO() {
+    if (--lfo_step <= 0) {
+        lfo_step = LFO_MAX;
+        lfo_phase += lfo_inc;
+
+        if (lfo_phase > PI){
+            lfo_phase -= TAU;
+        }
+
+        const float sine = std::sin(lfo_phase);
+        float vibrato_mod = 1.0f + sine * vibrato;
+        
+        for (int v = 0; v < MAX_VOICES; ++v) {
+            Voice& voice = voices_[v];
+            if (voice.env.isActive()) {
+                voice.osc1.modulation = vibrato_mod;
+                voice.osc2.modulation = vibrato_mod;
+            }
+        }
+    }
 }
 
 void Synth::midi_message(uint8_t data0, uint8_t data1, uint8_t data2) {
@@ -117,8 +143,8 @@ void Synth::startVoice(int v, int note, int velocity) {
     voice.note = note;
     voice.updatePanning();
 
-    // voice.osc1.amplitude = (velocity / 127.0f) * 0.5f;
-    voice.osc1.amplitude = volume_trim * velocity;
+    float velocity_curve = 0.004f * float((velocity + 64) * (velocity + 64)) - 8.0f;
+    voice.osc1.amplitude = volume_trim * velocity_curve;
     voice.osc2.amplitude = voice.osc1.amplitude * osc_mix;
 
     // OPTIONAL: Resetting the phase on notes between the oscillators changes the way the notes sound
@@ -150,6 +176,8 @@ int Synth::findFreeVoice() const {
 }
 
 void Synth::noteOn(int note, int velocity) {
+    if (ignore_velocity) { velocity = 80; }
+
     int v = 0;
 
     if (num_voices == 1) {  // monophonic

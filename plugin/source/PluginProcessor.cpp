@@ -327,6 +327,22 @@ void CX11SynthAudioProcessor::update() {
   synth.num_voices = (poly_mode_param->getIndex() == 0) ? 1 : Synth::MAX_VOICES;
   synth.output_level_smoother.setTargetValue(juce::Decibels::decibelsToGain(output_level_param->get()));
 
+  float vibrato = vibrato_param->get() / 200.0f;
+  synth.vibrato = 0.2f * vibrato * vibrato;
+  
+  float filter_velocity = filter_velocity_param->get();
+  if (filter_velocity < -90.0f) {
+    synth.velocity_sensitivity = 0.0f;
+    synth.ignore_velocity = true;
+  } else {
+    synth.velocity_sensitivity = 0.0005f * filter_velocity;
+    synth.ignore_velocity = false;
+  }
+
+  const float inverse_update_rate = inverse_sample_rate * synth.LFO_MAX;
+  float lfo_rate = std::exp(7.0f * lfo_rate_param->get() - 4.0f); // exp(7x - 4)
+  synth.lfo_inc = lfo_rate * inverse_update_rate * float(TAU);
+
 
   // starting pitch is 2^(n/12) where n is the number of fractional semitones. Alternate is 2.0 ^((-semi - 0.01f * cent) / 12.0f)
   // 1.059463094359f == 2^(1/12)
