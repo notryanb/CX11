@@ -23,6 +23,7 @@ void Synth::reset() {
         voices_[v].reset();
     }
 
+    mod_wheel = 0.0f;
     sustained_pedal_pressed = false;
     noise_gen.reset();
     pitch_bend = 1.0f;
@@ -93,8 +94,8 @@ void Synth::updateLFO() {
         }
 
         const float sine = std::sin(lfo_phase);
-        float vibrato_mod = 1.0f + sine * vibrato;
-        float pwm = 1.0f + sine * pwm_depth;
+        float vibrato_mod = 1.0f + sine * (mod_wheel + vibrato);
+        float pwm = 1.0f + sine * (mod_wheel + pwm_depth);
         
         for (int v = 0; v < MAX_VOICES; ++v) {
             Voice& voice = voices_[v];
@@ -227,6 +228,9 @@ void Synth::controlChange(uint8_t data1, uint8_t data2) {
             if (!sustained_pedal_pressed) {
                 noteOff(SUSTAIN);
             }
+            break;
+        case 0x01:
+            mod_wheel = 0.000005f * float(data2 * data2);
             break;
         default:
             if (data1 >= 0x78) {
