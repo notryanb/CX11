@@ -2,6 +2,8 @@
 #include "CX11Synth/PluginEditor.h"
 #include "CX11Synth/Utils.h"
 
+#include <iostream> // for debug
+
 namespace audio_plugin {
 CX11SynthAudioProcessor::CX11SynthAudioProcessor()
     : AudioProcessor(
@@ -346,6 +348,17 @@ void CX11SynthAudioProcessor::update() {
   float lfo_rate = std::exp(7.0f * lfo_rate_param->get() - 4.0f); // exp(7x - 4)
   synth.lfo_inc = lfo_rate * inverse_update_rate * float(TAU);
 
+  synth.glide_mode = glide_mode_param->getIndex();
+
+  float glide_rate = glide_rate_param->get();
+  if (glide_rate < 2.0f) {
+    synth.glide_rate = 1.0f; // No glide
+  } else {
+    synth.glide_rate = 1.0f - std::exp(-inverse_update_rate * std::exp(6.0f - 0.07f * glide_rate));
+  }
+
+  synth.glide_bend = glide_bend_param->get();
+
 
   // starting pitch is 2^(n/12) where n is the number of fractional semitones. Alternate is 2.0 ^((-semi - 0.01f * cent) / 12.0f)
   // 1.059463094359f == 2^(1/12)
@@ -364,6 +377,21 @@ void CX11SynthAudioProcessor::update() {
 }
 
 void CX11SynthAudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2) {
+  // control change
+  if ((data0 & 0xF0) == 0xB0) {
+    if (data1 == 0x07) {
+      float volume_ctl = float(data2) / 127.0f;
+      std::cout << volume_ctl << std::endl; // debug
+      output_level_param->beginChangeGesture();
+      // NOTE: setValueNotifyingHost has a lock inside of it, however it should only be unbounded and potentially cause a glitch
+      // if a MIDI message and opening/closing the editor window
+      // were to happen at the same time.
+      output_level_param->setValueNotifyingHost(volume_ctl);
+      output_level_param->endChangeGesture();
+      
+    }
+  }
+  
   // Change program via MIDI
   if ((data0 & 0xF0) == 0xC0){
     if (data1 < presets.size()) {

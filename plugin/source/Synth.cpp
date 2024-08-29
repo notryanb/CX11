@@ -29,6 +29,7 @@ void Synth::reset() {
     pitch_bend = 1.0f;
     lfo_phase = 0.0f;
     lfo_step = 0;
+    last_note = 0;
 
     output_level_smoother.reset(sample_rate, 0.05);
 }
@@ -40,8 +41,8 @@ void Synth::render(float** output_buffers, int sample_count) {
     for (int v = 0; v < MAX_VOICES; ++v) {
         Voice& voice = voices_[v];
         if (voice.env.isActive()) {
-            voice.osc1.period = voice.period * pitch_bend;
-            voice.osc2.period = voice.osc1.period * detune;
+            updatePeriod(voice);
+            voice.glide_rate = glide_rate;
         }
     }
 
@@ -102,6 +103,9 @@ void Synth::updateLFO() {
             if (voice.env.isActive()) {
                 voice.osc1.modulation = vibrato_mod;
                 voice.osc2.modulation = pwm;
+
+                voice.update_LFO();
+                updatePeriod(voice);
             }
         }
     }
@@ -138,10 +142,21 @@ void Synth::midi_message(uint8_t data0, uint8_t data1, uint8_t data2) {
 
 void Synth::startVoice(int v, int note, int velocity) {
     float period = calcPeriod(v, note);
-    Voice& voice = voices_[v];
 
-    // Converts midi note to frequency
-    voice.period = period;
+    Voice& voice = voices_[v];
+    voice.target = period;
+
+    int note_distance = 0;
+    if (last_note > 0) {
+        if ((glide_mode == 2) || ((glide_mode == 1) && isPlayingLegatoStyle())) {
+            note_distance = note - last_note;
+        }
+    }
+
+    voice.period = period * std::pow(1.059463094359f, float(note_distance) - glide_bend);
+    if (voice.period < 6.0f) { voice.period = 6.0f; }
+
+    last_note = note;
     voice.note = note;
     voice.updatePanning();
 
@@ -286,10 +301,20 @@ void Synth::restartMonoVoice(int note, int velocity) {
     float period = calcPeriod(0, note);
 
     Voice& voice = voices_[0];
-    voice.period = period;
+    voice.target = period;
+
+    if (glide_mode == 0) { voice.period = period; }
 
     voice.env.level += SILENCE + SILENCE;
     voice.note = note;
     voice.updatePanning();
+}
+
+bool Synth::isPlayingLegatoStyle() const {
+    int held = 0;
+    for (int i = 0; i < MAX_VOICES; ++i) {
+        if (voices_[i].note > 0) { held += 1; }
+    }
+    return held > 0;
 }
 //} // End namespace

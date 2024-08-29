@@ -32,6 +32,10 @@ class Synth {
         float vibrato;
         float pwm_depth;
         float mod_wheel;
+        int glide_mode;
+        float glide_rate;
+        float glide_bend;
+        int last_note;
         bool ignore_velocity;
 
         juce::LinearSmoothedValue<float> output_level_smoother;
@@ -61,5 +65,11 @@ class Synth {
         void noteOn(int note, int velocity);
         void noteOff(int note);
         float calcPeriod(int v, int note) const;
+        bool isPlayingLegatoStyle() const;
+
+        inline void updatePeriod(Voice& voice) {
+            voice.osc1.period = voice.period * pitch_bend;
+            voice.osc2.period = voice.osc1.period * detune;
+        }
 };
 //} // End NameSpace
