@@ -10,8 +10,13 @@ static const int SUSTAIN = -1;
 Synth::Synth() {
     sample_rate = 44100.0f;
 }
+
 void Synth::allocate_resources(double sample_rate_, int /*samples_per_block*/) {
     sample_rate = static_cast<float>(sample_rate_);
+
+    for (int v = 0; v < MAX_VOICES; ++v) {
+        voices_[v].filter.sample_rate = sample_rate;
+    }
 }
 
 void Synth::deallocate_resources() {
@@ -78,6 +83,7 @@ void Synth::render(float** output_buffers, int sample_count) {
         Voice& voice = voices_[v];
         if (!voice.env.isActive()) {
             voice.env.reset();
+            voice.filter.reset();
         }
     }
 

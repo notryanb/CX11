@@ -1,8 +1,9 @@
 #pragma once
 
 #include <algorithm>
-#include "Oscillator.h"
 #include "Envelope.h"
+#include "Filter.h"
+#include "Oscillator.h"
 
 struct Voice {
     int note;
@@ -11,8 +12,9 @@ struct Voice {
     float pan_left, pan_right;
     float target;
     float glide_rate;
-    Envelope env;
 
+    Envelope env;
+    Filter filter;
     Oscillator osc1;
     Oscillator osc2;
 
@@ -21,6 +23,7 @@ struct Voice {
         saw = 0.0f;
         pan_left = 0.707f;
         pan_right = 0.707f;
+        filter.reset();
         osc1.reset();
         osc2.reset();
         env.reset();
@@ -37,7 +40,13 @@ struct Voice {
 
         saw = saw * 0.997f + sample1 - sample2;
          
-        float output = saw + input; // mixes in the noise
+        /*
+            Ordering of the filter vs envelope application is irrelevant if the system is
+            LTI (linear time-invariant).
+        
+        */
+        float output = saw + input;       // mixes in the noise
+        output = filter.render(output);   // apply the filter
         float envelope = env.nextValue(); // apply the envlope
         return output * envelope;
         // output = 0.0f;
@@ -52,6 +61,7 @@ struct Voice {
     }
 
     void update_LFO() {
+        filter.updateCoefficients(1000.0f, 0.707f); // 0.707 (sqrt(.5)) means no resonance. Consider this the minimum value
         period += glide_rate * (target - period);
     }
 };
