@@ -359,6 +359,8 @@ void CX11SynthAudioProcessor::update() {
 
   synth.glide_bend = glide_bend_param->get();
 
+  synth.filter_key_tracking = 0.08f * filter_freq_param->get() - 1.5f; // multiplier range -1.5..6.5
+
 
   // starting pitch is 2^(n/12) where n is the number of fractional semitones. Alternate is 2.0 ^((-semi - 0.01f * cent) / 12.0f)
   // 1.059463094359f == 2^(1/12)

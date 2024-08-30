@@ -103,13 +103,15 @@ void Synth::updateLFO() {
         const float sine = std::sin(lfo_phase);
         float vibrato_mod = 1.0f + sine * (mod_wheel + vibrato);
         float pwm = 1.0f + sine * (mod_wheel + pwm_depth);
-        
+        float filter_mod = filter_key_tracking;
+
         for (int v = 0; v < MAX_VOICES; ++v) {
             Voice& voice = voices_[v];
             if (voice.env.isActive()) {
                 voice.osc1.modulation = vibrato_mod;
                 voice.osc2.modulation = pwm;
-
+                voice.filter_mod = filter_mod;
+                
                 voice.update_LFO();
                 updatePeriod(voice);
             }
@@ -173,6 +175,8 @@ void Synth::startVoice(int v, int note, int velocity) {
     if (vibrato == 0.0f && pwm_depth > 0.0f) {
         voice.osc2.squareWave(voice.osc1, voice.period);
     }
+
+    voice.cutoff = sample_rate / (period * PI);
 
     // OPTIONAL: Resetting the phase on notes between the oscillators changes the way the notes sound
     // when you play the same thing repeatedly. See which one sounds better.
