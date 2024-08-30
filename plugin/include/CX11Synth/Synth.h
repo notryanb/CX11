@@ -37,6 +37,8 @@ class Synth {
         float glide_bend;
         int last_note;
         float filter_key_tracking;
+        float filter_q;
+        float resonance_ctrl;
         bool ignore_velocity;
 
         juce::LinearSmoothedValue<float> output_level_smoother;

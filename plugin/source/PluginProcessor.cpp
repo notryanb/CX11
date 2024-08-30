@@ -313,9 +313,13 @@ void CX11SynthAudioProcessor::update() {
   float noise_mix = noise_param->get() / 100.0f;
   noise_mix *= noise_mix;
   synth.noise_mix = noise_mix * 0.06f;
+
+  synth.filter_key_tracking = 0.08f * filter_freq_param->get() - 1.5f; // multiplier range -1.5..6.5
+  float filter_reso = filter_reso_param->get() / 100.0f;
+  synth.filter_q = std::exp(3.0f * filter_reso);
   
   synth.osc_mix = osc_mix_param->get() / 100.0f;
-  synth.volume_trim = 0.0008f * (3.2f - synth.osc_mix - 25.0f * synth.noise_mix) * 1.5f;
+  synth.volume_trim = 0.0008f * (3.2f - synth.osc_mix - 25.0f * synth.noise_mix) * (1.5f - 0.5f * filter_reso);
 
   float semi = osc_tune_param->get();
   float cent = osc_fine_param->get();
@@ -359,7 +363,7 @@ void CX11SynthAudioProcessor::update() {
 
   synth.glide_bend = glide_bend_param->get();
 
-  synth.filter_key_tracking = 0.08f * filter_freq_param->get() - 1.5f; // multiplier range -1.5..6.5
+  
 
 
   // starting pitch is 2^(n/12) where n is the number of fractional semitones. Alternate is 2.0 ^((-semi - 0.01f * cent) / 12.0f)

@@ -28,14 +28,15 @@ void Synth::reset() {
         voices_[v].reset();
     }
 
-    mod_wheel = 0.0f;
     sustained_pedal_pressed = false;
-    noise_gen.reset();
-    pitch_bend = 1.0f;
     lfo_phase = 0.0f;
     lfo_step = 0;
     last_note = 0;
+    mod_wheel = 0.0f;
+    pitch_bend = 1.0f;
+    resonance_ctrl = 1.0f;
 
+    noise_gen.reset();
     output_level_smoother.reset(sample_rate, 0.05);
 }
 
@@ -48,6 +49,7 @@ void Synth::render(float** output_buffers, int sample_count) {
         if (voice.env.isActive()) {
             updatePeriod(voice);
             voice.glide_rate = glide_rate;
+            voice.filter_q = filter_q * resonance_ctrl;
         }
     }
 
@@ -111,7 +113,7 @@ void Synth::updateLFO() {
                 voice.osc1.modulation = vibrato_mod;
                 voice.osc2.modulation = pwm;
                 voice.filter_mod = filter_mod;
-                
+
                 voice.update_LFO();
                 updatePeriod(voice);
             }
@@ -177,6 +179,7 @@ void Synth::startVoice(int v, int note, int velocity) {
     }
 
     voice.cutoff = sample_rate / (period * PI);
+    voice.cutoff *= std::exp(velocity_sensitivity * float(velocity - 64));
 
     // OPTIONAL: Resetting the phase on notes between the oscillators changes the way the notes sound
     // when you play the same thing repeatedly. See which one sounds better.
@@ -257,6 +260,9 @@ void Synth::controlChange(uint8_t data1, uint8_t data2) {
         case 0x01:
             mod_wheel = 0.000005f * float(data2 * data2);
             break;
+        case 0x47:
+            resonance_ctrl = 154.0f / float (154 - data2);
+            break;
         default:
             if (data1 >= 0x78) {
                 for (int v = 0; v < MAX_VOICES; ++v) {
@@ -314,6 +320,11 @@ void Synth::restartMonoVoice(int note, int velocity) {
     voice.target = period;
 
     if (glide_mode == 0) { voice.period = period; }
+
+    voice.cutoff = sample_rate / (period * PI);
+    if (velocity > 0) {
+        voice.cutoff *= std::exp(velocity_sensitivity * float(velocity - 64));
+    }
 
     voice.env.level += SILENCE + SILENCE;
     voice.note = note;
