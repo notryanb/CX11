@@ -362,6 +362,8 @@ void CX11SynthAudioProcessor::update() {
   }
 
   synth.glide_bend = glide_bend_param->get();
+  float filter_lfo = filter_lfo_param->get() / 100.0f;
+  synth.filter_lfo_depth = 2.5f * filter_lfo * filter_lfo; // parabolic curve [0..2.5]
 
   
 

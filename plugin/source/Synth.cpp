@@ -29,6 +29,7 @@ void Synth::reset() {
     }
 
     sustained_pedal_pressed = false;
+    pressure = 0.0f;
     lfo_phase = 0.0f;
     lfo_step = 0;
     last_note = 0;
@@ -105,7 +106,7 @@ void Synth::updateLFO() {
         const float sine = std::sin(lfo_phase);
         float vibrato_mod = 1.0f + sine * (mod_wheel + vibrato);
         float pwm = 1.0f + sine * (mod_wheel + pwm_depth);
-        float filter_mod = filter_key_tracking;
+        float filter_mod = filter_key_tracking * (filter_lfo_depth + pressure) * sine;
 
         for (int v = 0; v < MAX_VOICES; ++v) {
             Voice& voice = voices_[v];
@@ -143,6 +144,9 @@ void Synth::midi_message(uint8_t data0, uint8_t data1, uint8_t data2) {
             break;
         case 0xB0:
             controlChange(data1, data2);
+            break;
+        case 0xD0:
+            pressure = 0.0001f * float(data1 * data1); // map 0.0 .. 1.61 (position 127)
             break;
         case 0xE0: // TODO - investigate why the compiler won't let me put this after the noteOn case...?
             pitch_bend = std::exp(-0.000014102f * float(data1 + 128 * data2 - 8192));

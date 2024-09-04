@@ -39,6 +39,8 @@ class Synth {
         float filter_key_tracking;
         float filter_q;
         float resonance_ctrl;
+        float filter_lfo_depth;
+        float pressure;
         bool ignore_velocity;
 
         juce::LinearSmoothedValue<float> output_level_smoother;
