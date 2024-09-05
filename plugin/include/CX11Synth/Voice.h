@@ -15,6 +15,7 @@ struct Voice {
     float cutoff;
     float filter_mod;
     float filter_q;
+    float pitch_bend; // multiplier based on number of semitones
 
     Envelope env;
     Filter filter;
@@ -64,7 +65,7 @@ struct Voice {
     }
 
     void update_LFO() {
-        float modulated_cutoff =  cutoff * std::exp(filter_mod);
+        float modulated_cutoff =  cutoff * std::exp(filter_mod) / pitch_bend;
         modulated_cutoff = std::clamp(modulated_cutoff, 30.0f, 20000.0f);
         filter.updateCoefficients(modulated_cutoff, filter_q); // 0.707 (sqrt(.5)) means no resonance. Consider this the minimum value
         period += glide_rate * (target - period);

@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+// state variable filter
 class Filter {
     public:
         float sample_rate;
