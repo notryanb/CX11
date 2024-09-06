@@ -365,6 +365,13 @@ void CX11SynthAudioProcessor::update() {
   float filter_lfo = filter_lfo_param->get() / 100.0f;
   synth.filter_lfo_depth = 2.5f * filter_lfo * filter_lfo; // parabolic curve [0..2.5]
 
+  synth.filter_attack = std::exp(-inverse_update_rate * std::exp(5.5f - 0.075f * filter_attack_param->get()));
+  synth.filter_decay  = std::exp(-inverse_update_rate * std::exp(5.5f - 0.075f * filter_decay_param->get()));
+  synth.filter_sustain = filter_sustain_param->get() / 100.0f;
+  synth.filter_sustain = synth.filter_sustain * synth.filter_sustain; // logarithmic nature of frequencies?
+  synth.filter_release  = std::exp(-inverse_update_rate * std::exp(5.5f - 0.075f * filter_release_param->get()));
+  synth.filter_env_depth = 0.06f * filter_env_param->get();
+
   
 
 

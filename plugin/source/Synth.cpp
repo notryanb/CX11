@@ -51,10 +51,15 @@ void Synth::render(float** output_buffers, int sample_count) {
     for (int v = 0; v < MAX_VOICES; ++v) {
         Voice& voice = voices_[v];
         if (voice.env.isActive()) {
+            // NOTE:
+            // Synth and Voice share a lot of data. This can potentially be put into a Struct
+            // and the Voice can track a pointer to that struct upon constuction. DON'T USE GLOBAlS.
+            // Another idea is to have Voice hold a pointer back to Synth ... I don't like that approach
             updatePeriod(voice);
             voice.glide_rate = glide_rate;
             voice.filter_q = filter_q * resonance_ctrl;
             voice.pitch_bend = pitch_bend;
+            voice.filter_env_depth = filter_env_depth;
         }
     }
 
@@ -203,6 +208,13 @@ void Synth::startVoice(int v, int note, int velocity) {
     env.sustain_level = env_sustain;
     env.release_multiplier = env_release;
     env.attack();
+
+    Envelope& filter_env = voice.filter_env;
+    filter_env.attack_multiplier = filter_attack;
+    filter_env.decay_multiplier = filter_decay;
+    filter_env.sustain_level = filter_sustain;
+    filter_env.release_multiplier = filter_release;
+    filter_env.attack();
 }
 
 // Finds a voice to use that has the lowest level and is not in attack portion of the envelope.

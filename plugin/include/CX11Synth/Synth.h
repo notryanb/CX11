@@ -43,6 +43,11 @@ class Synth {
         float pressure;
         float filter_ctrl;
         float filter_zip;
+        float filter_attack;
+        float filter_decay;
+        float filter_sustain;
+        float filter_release;
+        float filter_env_depth;
         bool ignore_velocity;
 
         juce::LinearSmoothedValue<float> output_level_smoother;
