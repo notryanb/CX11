@@ -432,9 +432,10 @@ bool CX11SynthAudioProcessor::hasEditor() const {
 }
 
 juce::AudioProcessorEditor* CX11SynthAudioProcessor::createEditor() {
-  auto editor = new juce::GenericAudioProcessorEditor(*this);
-  editor->setSize(500, 1050);
-  return editor;
+  return new CX11SynthAudioProcessorEditor(*this);
+  // auto editor = new juce::GenericAudioProcessorEditor(*this);
+  // editor->setSize(500, 1050);
+  // return editor;
 }
 
 void CX11SynthAudioProcessor::getStateInformation(juce::MemoryBlock& destData) {

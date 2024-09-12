@@ -8,19 +8,29 @@ namespace audio_plugin {
 
     juce::ignoreUnused(audioProcessor);
 
-    setSize(400, 300);
+    output_level_knob.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
+    output_level_knob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
+    addAndMakeVisible(output_level_knob);
+
+    setSize(600, 400);
   }
 
   CX11SynthAudioProcessorEditor::~CX11SynthAudioProcessorEditor() {}
 
   void CX11SynthAudioProcessorEditor::paint(juce::Graphics& g) {
+
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    g.setColour(juce::Colours::white);
-    g.setFont(15.0f);
-    g.drawFittedText("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    /* Default */
+    // g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+
+    // g.setColour(juce::Colours::white);
+    // g.setFont(15.0f);
+    // g.drawFittedText("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
   }
 
-  void CX11SynthAudioProcessorEditor::resized() {}
+  void CX11SynthAudioProcessorEditor::resized() {
+    output_level_knob.setBounds(20, 20, 100, 120);
+  }
 
 }  // namespace audio_plugin
