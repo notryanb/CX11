@@ -10,7 +10,12 @@ namespace audio_plugin {
 
     output_level_knob.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
     output_level_knob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
+    filter_reso_knob.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
+    filter_reso_knob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
+
+
     addAndMakeVisible(output_level_knob);
+    addAndMakeVisible(filter_reso_knob);
 
     setSize(600, 400);
   }
@@ -31,6 +36,7 @@ namespace audio_plugin {
 
   void CX11SynthAudioProcessorEditor::resized() {
     output_level_knob.setBounds(20, 20, 100, 120);
+    filter_reso_knob.setBounds(120, 20, 100, 120);
   }
 
 }  // namespace audio_plugin
