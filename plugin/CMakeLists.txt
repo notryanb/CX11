@@ -29,9 +29,11 @@ juce_add_plugin(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
     PRIVATE
         source/Synth.cpp
+        source/RotaryKnob.cpp
         source/PluginEditor.cpp
         source/PluginProcessor.cpp
         ${INCLUDE_DIR}/Synth.h
+        ${INCLUDE_DIR}/RotaryKnob.h
         ${INCLUDE_DIR}/PluginEditor.h
         ${INCLUDE_DIR}/PluginProcessor.h
 )

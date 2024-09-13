@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PluginProcessor.h"
+#include "RotaryKnob.h"
 
 namespace audio_plugin {
 
@@ -20,11 +21,11 @@ namespace audio_plugin {
     using SliderAttachment = APVTS::SliderAttachment;
     using ButtonAttachment = APVTS::ButtonAttachment;
 
-    juce::Slider output_level_knob;
-    SliderAttachment output_level_attachment { audioProcessor.apvts, ParameterId::output_level.getParamID(), output_level_knob };
+    RotaryKnob output_level_knob;
+    SliderAttachment output_level_attachment { audioProcessor.apvts, ParameterId::output_level.getParamID(), output_level_knob.slider };
 
-    juce::Slider filter_reso_knob;
-    SliderAttachment filter_reso_attachment { audioProcessor.apvts, ParameterId::filter_reso.getParamID(), filter_reso_knob };
+    RotaryKnob filter_reso_knob;
+    SliderAttachment filter_reso_attachment { audioProcessor.apvts, ParameterId::filter_reso.getParamID(), filter_reso_knob.slider };
 
     juce::TextButton poly_mode_button;
     ButtonAttachment poly_mode_attachment { audioProcessor.apvts, ParameterId::poly_mode.getParamID(), poly_mode_button };

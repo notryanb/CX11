@@ -8,12 +8,10 @@ namespace audio_plugin {
 
     juce::ignoreUnused(audioProcessor);
 
-    output_level_knob.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
-    output_level_knob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
+    output_level_knob.label = "Output Level";
     addAndMakeVisible(output_level_knob);
 
-    filter_reso_knob.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
-    filter_reso_knob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
+    filter_reso_knob.label = "Filter Reso";
     addAndMakeVisible(filter_reso_knob);
 
     poly_mode_button.setButtonText("Poly");
@@ -38,9 +36,14 @@ namespace audio_plugin {
   }
 
   void CX11SynthAudioProcessorEditor::resized() {
-    output_level_knob.setBounds(20, 20, 100, 120);
-    filter_reso_knob.setBounds(120, 20, 100, 120);
-    poly_mode_button.setBounds(240, 20, 80, 30);
+    juce::Rectangle r(20, 20, 100, 120);
+    output_level_knob.setBounds(r);
+
+    r = r.withX(r.getRight() + 20);
+    filter_reso_knob.setBounds(r);
+
+    poly_mode_button.setSize(80, 30);
+    poly_mode_button.setCentrePosition(r.withX(r.getRight()).getCentre());
   }
 
 }  // namespace audio_plugin
