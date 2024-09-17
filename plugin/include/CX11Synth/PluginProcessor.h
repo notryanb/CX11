@@ -7,32 +7,32 @@
 namespace ParameterId {
   #define PARAMETER_ID(str) const juce::ParameterID str(#str, 1);
 
-  PARAMETER_ID(osc_mix);
-  PARAMETER_ID(osc_tune);
-  PARAMETER_ID(osc_fine);
-  PARAMETER_ID(glide_mode);
-  PARAMETER_ID(glide_rate);
-  PARAMETER_ID(glide_bend);
-  PARAMETER_ID(filter_freq);
-  PARAMETER_ID(filter_reso);
-  PARAMETER_ID(filter_env);
-  PARAMETER_ID(filter_lfo);
-  PARAMETER_ID(filter_velocity);
-  PARAMETER_ID(filter_attack);
-  PARAMETER_ID(filter_decay);
-  PARAMETER_ID(filter_sustain);
-  PARAMETER_ID(filter_release);
-  PARAMETER_ID(env_attack);
-  PARAMETER_ID(env_decay);
-  PARAMETER_ID(env_sustain);
-  PARAMETER_ID(env_release);
-  PARAMETER_ID(lfo_rate);
-  PARAMETER_ID(vibrato);
-  PARAMETER_ID(noise);
-  PARAMETER_ID(octave);
-  PARAMETER_ID(tuning);
-  PARAMETER_ID(output_level);
-  PARAMETER_ID(poly_mode);
+  PARAMETER_ID(osc_mix)
+  PARAMETER_ID(osc_tune)
+  PARAMETER_ID(osc_fine)
+  PARAMETER_ID(glide_mode)
+  PARAMETER_ID(glide_rate)
+  PARAMETER_ID(glide_bend)
+  PARAMETER_ID(filter_freq)
+  PARAMETER_ID(filter_reso)
+  PARAMETER_ID(filter_env)
+  PARAMETER_ID(filter_lfo)
+  PARAMETER_ID(filter_velocity)
+  PARAMETER_ID(filter_attack)
+  PARAMETER_ID(filter_decay)
+  PARAMETER_ID(filter_sustain)
+  PARAMETER_ID(filter_release)
+  PARAMETER_ID(env_attack)
+  PARAMETER_ID(env_decay)
+  PARAMETER_ID(env_sustain)
+  PARAMETER_ID(env_release)
+  PARAMETER_ID(lfo_rate)
+  PARAMETER_ID(vibrato)
+  PARAMETER_ID(noise)
+  PARAMETER_ID(octave)
+  PARAMETER_ID(tuning)
+  PARAMETER_ID(output_level)
+  PARAMETER_ID(poly_mode)
 
   #undef PARAMETER_ID
 }

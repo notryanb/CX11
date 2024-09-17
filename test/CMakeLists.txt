@@ -5,6 +5,9 @@ project(CX11SynthTest)
 # Signals to CMake that we want to run tests from this directory.
 enable_testing()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_CXX_STANDARD 20)
+
 # Creates the test console application.
 add_executable(${PROJECT_NAME}
     source/AudioProcessorTest.cpp)
