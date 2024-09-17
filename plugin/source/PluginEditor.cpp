@@ -7,6 +7,7 @@ namespace audio_plugin {
     : AudioProcessorEditor(&p), audioProcessor(p) {
 
     juce::ignoreUnused(audioProcessor);
+    juce::LookAndFeel::setDefaultLookAndFeel(&globalLNF);
 
     output_level_knob.label = "Output Level";
     addAndMakeVisible(output_level_knob);
