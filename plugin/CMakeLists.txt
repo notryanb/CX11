@@ -29,6 +29,7 @@ juce_add_plugin(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
     PRIVATE
         source/Synth.cpp
+        source/LookAndFeel.cpp
         source/RotaryKnob.cpp
         source/PluginEditor.cpp
         source/PluginProcessor.cpp

@@ -2,6 +2,7 @@
 
 #include "PluginProcessor.h"
 #include "RotaryKnob.h"
+#include "LookAndFeel.h"
 
 namespace audio_plugin {
 
@@ -20,6 +21,8 @@ namespace audio_plugin {
     using APVTS = juce::AudioProcessorValueTreeState;
     using SliderAttachment = APVTS::SliderAttachment;
     using ButtonAttachment = APVTS::ButtonAttachment;
+
+    LookAndFeel globalLNF;
 
     RotaryKnob output_level_knob;
     SliderAttachment output_level_attachment { audioProcessor.apvts, ParameterId::output_level.getParamID(), output_level_knob.slider };
