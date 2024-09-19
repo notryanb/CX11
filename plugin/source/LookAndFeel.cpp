@@ -1,6 +1,10 @@
 #include "CX11Synth\LookAndFeel.h"
+#include "CX11Synth\BinaryData.h"
 
 LookAndFeel::LookAndFeel() {
+    juce::Typeface::Ptr typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::LatoMedium_ttf, BinaryData::LatoMedium_ttfSize);
+    setDefaultSansSerifTypeface(typeface);
+
     setColour(juce::ResizableWindow::backgroundColourId, juce::Colour(30, 60, 90));
 
     setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0, 0, 0));

@@ -28,6 +28,7 @@ juce_add_plugin(${PROJECT_NAME}
 # Sets the source files of the plugin project.
 target_sources(${PROJECT_NAME}
     PRIVATE
+        source/BinaryData.cpp
         source/Synth.cpp
         source/LookAndFeel.cpp
         source/RotaryKnob.cpp
