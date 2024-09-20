@@ -283,9 +283,9 @@ void Synth::controlChange(uint8_t data1, uint8_t data2) {
         case 0x01:
             mod_wheel = 0.000005f * float(data2 * data2);
             break;
-        case 0x47:
-            resonance_ctrl = 154.0f / float (154 - data2);
-            break;
+        // case 0x47:
+        //     resonance_ctrl = 154.0f / float (154 - data2);
+        //     break;
         case 0x4A:
             filter_ctrl = 0.02f * float(data2);
             break;
@@ -300,6 +300,10 @@ void Synth::controlChange(uint8_t data1, uint8_t data2) {
                 sustained_pedal_pressed = false;            
             }
             break;
+    }
+
+    if (data1 == reso_cc) {
+        resonance_ctrl = 154.0f / float (154 - data2);
     }
 }
 

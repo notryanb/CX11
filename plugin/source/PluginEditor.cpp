@@ -1,6 +1,8 @@
 #include "CX11Synth/PluginEditor.h"
 #include "CX11Synth/PluginProcessor.h"
 
+#include <iostream>
+
 namespace audio_plugin {
 
   CX11SynthAudioProcessorEditor::CX11SynthAudioProcessorEditor(CX11SynthAudioProcessor& p) 
@@ -19,10 +21,17 @@ namespace audio_plugin {
     poly_mode_button.setClickingTogglesState(true);
     addAndMakeVisible(poly_mode_button);
 
+    midi_learn_btn.setButtonText("MIDI Learn");
+    midi_learn_btn.addListener(this);
+    addAndMakeVisible(midi_learn_btn);
+
     setSize(600, 400);
   }
 
-  CX11SynthAudioProcessorEditor::~CX11SynthAudioProcessorEditor() {}
+  CX11SynthAudioProcessorEditor::~CX11SynthAudioProcessorEditor() {
+    midi_learn_btn.removeListener(this);
+    audioProcessor.midi_learn = false;
+  }
 
   void CX11SynthAudioProcessorEditor::paint(juce::Graphics& g) {
 
@@ -45,6 +54,23 @@ namespace audio_plugin {
 
     poly_mode_button.setSize(80, 30);
     poly_mode_button.setCentrePosition(r.withX(r.getRight()).getCentre());
+
+    midi_learn_btn.setBounds(400, 20, 100, 30);
+  }
+
+  void CX11SynthAudioProcessorEditor::buttonClicked(juce::Button* button) {
+    button->setButtonText("Waiting...");
+    button->setEnabled(false);
+    audioProcessor.midi_learn = true;
+    startTimerHz(10);
+  }
+
+  void CX11SynthAudioProcessorEditor::timerCallback() {
+    if (!audioProcessor.midi_learn) {
+      stopTimer();
+      midi_learn_btn.setButtonText("MIDI Learn");
+      midi_learn_btn.setEnabled(true);
+    }
   }
 
 }  // namespace audio_plugin

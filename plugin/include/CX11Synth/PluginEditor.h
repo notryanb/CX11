@@ -6,7 +6,8 @@
 
 namespace audio_plugin {
 
-  class CX11SynthAudioProcessorEditor : public juce::AudioProcessorEditor {
+  class CX11SynthAudioProcessorEditor : public juce::AudioProcessorEditor, 
+                                        private juce::Button::Listener, juce::Timer {
   public:
     explicit CX11SynthAudioProcessorEditor(CX11SynthAudioProcessor&);
     ~CX11SynthAudioProcessorEditor() override;
@@ -22,7 +23,10 @@ namespace audio_plugin {
     using SliderAttachment = APVTS::SliderAttachment;
     using ButtonAttachment = APVTS::ButtonAttachment;
 
+
     LookAndFeel globalLNF;
+
+    juce::TextButton midi_learn_btn;
 
     RotaryKnob output_level_knob;
     SliderAttachment output_level_attachment { audioProcessor.apvts, ParameterId::output_level.getParamID(), output_level_knob.slider };
@@ -32,6 +36,9 @@ namespace audio_plugin {
 
     juce::TextButton poly_mode_button;
     ButtonAttachment poly_mode_attachment { audioProcessor.apvts, ParameterId::poly_mode.getParamID(), poly_mode_button };
+
+    void buttonClicked(juce::Button* button);
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CX11SynthAudioProcessorEditor)
   };

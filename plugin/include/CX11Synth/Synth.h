@@ -15,6 +15,7 @@ class Synth {
 
         static constexpr int MAX_VOICES = 8;
         const int LFO_MAX = 32;
+        uint8_t reso_cc = 0x47;
 
         int num_voices;
         float lfo_inc;

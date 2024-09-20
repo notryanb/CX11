@@ -213,6 +213,7 @@ void CX11SynthAudioProcessor::releaseResources() {
 }
 
 void CX11SynthAudioProcessor::reset() {
+  midi_learn = false;
   synth.reset();
   synth.output_level_smoother.setCurrentAndTargetValue(juce::Decibels::decibelsToGain(output_level_param->get()));
 }
@@ -392,7 +393,13 @@ void CX11SynthAudioProcessor::update() {
 }
 
 void CX11SynthAudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2) {
-  // control change
+  if (midi_learn && ((data0 & 0xF0) == 0xB0)) {
+    std::cout << "learned a midi cc" << std::endl;
+    synth.reso_cc = data1;
+    midi_learn = false;
+    return;  
+  }
+
   if ((data0 & 0xF0) == 0xB0) {
     if (data1 == 0x07) {
       float volume_ctl = float(data2) / 127.0f;
