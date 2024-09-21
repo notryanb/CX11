@@ -47,6 +47,7 @@ namespace audio_plugin {
       ~CX11SynthAudioProcessor() override;
 
       std::atomic<bool> midi_learn;
+      std::atomic<uint8_t> midi_learn_cc;
 
       void prepareToPlay(double sampleRate, int samplesPerBlock) override;
       void releaseResources() override;

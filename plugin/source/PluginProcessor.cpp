@@ -5,6 +5,11 @@
 #include <iostream> // for debug
 
 namespace audio_plugin {
+
+static const juce::Identifier plugin_tag = "PLUGIN";
+static const juce::Identifier extra_tag = "EXTRA";
+static const juce::Identifier midi_cc_attribute = "midCC";
+
 CX11SynthAudioProcessor::CX11SynthAudioProcessor()
     : AudioProcessor(
           BusesProperties()
@@ -214,6 +219,7 @@ void CX11SynthAudioProcessor::releaseResources() {
 
 void CX11SynthAudioProcessor::reset() {
   midi_learn = false;
+  midi_learn_cc = synth.reso_cc;
   synth.reset();
   synth.output_level_smoother.setCurrentAndTargetValue(juce::Decibels::decibelsToGain(output_level_param->get()));
 }
@@ -252,6 +258,8 @@ void CX11SynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
   for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i) {
     buffer.clear(i, 0, buffer.getNumSamples());
   }
+
+  synth.reso_cc = midi_learn_cc;
 
   bool expected = true;
   if (isNonRealtime() || parametersChanged.compare_exchange_strong(expected, false)) {
@@ -394,8 +402,8 @@ void CX11SynthAudioProcessor::update() {
 
 void CX11SynthAudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2) {
   if (midi_learn && ((data0 & 0xF0) == 0xB0)) {
-    std::cout << "learned a midi cc" << std::endl;
-    synth.reso_cc = data1;
+    std::cout << "Learned a MIDI cc: '" << std::to_string(data1) << "'" << std::endl;
+    midi_learn_cc = data1;
     midi_learn = false;
     return;  
   }
@@ -446,10 +454,21 @@ juce::AudioProcessorEditor* CX11SynthAudioProcessor::createEditor() {
 }
 
 void CX11SynthAudioProcessor::getStateInformation(juce::MemoryBlock& destData) {
+  auto xml = std::make_unique<juce::XmlElement>(plugin_tag);
+
+  std::unique_ptr<juce::XmlElement> parametersXML(apvts.copyState().createXml());
+  xml->addChildElement(parametersXML.release());
+
+  auto extraXml = std::make_unique<juce::XmlElement>(extra_tag);
+  extraXml->setAttribute(midi_cc_attribute, midi_learn_cc);
+  xml->addChildElement(extraXml.release());
+
   // You should use this method to store your parameters in the memory block.
   // You could do that either as raw data, or use the XML or ValueTree classes
   // as intermediaries to make it easy to save and load complex data.
-  copyXmlToBinary(*apvts.copyState().createXml(), destData);
+  copyXmlToBinary(*xml, destData);
+
+  //std::cout << xml->toString() << std::endl;
 }
 
 void CX11SynthAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
@@ -457,9 +476,21 @@ void CX11SynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
   // block, whose contents will have been created by the getStateInformation()
   // call.
   std::unique_ptr<juce::XmlElement> xml(getXmlFromBinary(data, sizeInBytes));
-  if (xml.get() != nullptr && xml->hasTagName(apvts.state.getType())) {
-    apvts.replaceState(juce::ValueTree::fromXml(*xml));
-    parametersChanged.store(true);
+
+  if (xml.get() != nullptr && xml->hasTagName(plugin_tag)) {
+    if (auto* extraXml = xml->getChildByName(extra_tag)) {
+      int midi_cc = extraXml->getIntAttribute(midi_cc_attribute);
+
+      if (midi_cc != 0) {
+        std::cout << "Loaded Midi CC: " << midi_cc << std::endl;
+        midi_learn_cc = static_cast<uint8_t>(midi_cc);
+      }
+    }
+    
+    if (auto* parametersXML = xml->getChildByName(apvts.state.getType())) {
+      apvts.replaceState(juce::ValueTree::fromXml(*parametersXML));
+      parametersChanged.store(true);
+    }
   }
 }
 
