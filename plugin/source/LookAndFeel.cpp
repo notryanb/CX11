@@ -1,5 +1,5 @@
-#include "CX11Synth\LookAndFeel.h"
-#include "CX11Synth\BinaryData.h"
+#include "CX11Synth/LookAndFeel.h"
+#include "CX11Synth/BinaryData.h"
 
 LookAndFeel::LookAndFeel() {
     juce::Typeface::Ptr typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::LatoMedium_ttf, BinaryData::LatoMedium_ttfSize);
