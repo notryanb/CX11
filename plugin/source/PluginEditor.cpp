@@ -17,6 +17,9 @@ namespace audio_plugin {
     filter_reso_knob.label = "Filter Reso";
     addAndMakeVisible(filter_reso_knob);
 
+    filter_freq_knob.label = "Filter Freq";
+    addAndMakeVisible(filter_freq_knob);
+
     poly_mode_button.setButtonText("Poly");
     poly_mode_button.setClickingTogglesState(true);
     addAndMakeVisible(poly_mode_button);
@@ -51,6 +54,9 @@ namespace audio_plugin {
 
     r = r.withX(r.getRight() + 20);
     filter_reso_knob.setBounds(r);
+
+    r = r.withX(r.getRight() + 20);
+    filter_freq_knob.setBounds(r);
 
     poly_mode_button.setSize(80, 30);
     poly_mode_button.setCentrePosition(r.withX(r.getRight()).getCentre());

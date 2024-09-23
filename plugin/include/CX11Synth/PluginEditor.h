@@ -34,6 +34,9 @@ namespace audio_plugin {
     RotaryKnob filter_reso_knob;
     SliderAttachment filter_reso_attachment { audioProcessor.apvts, ParameterId::filter_reso.getParamID(), filter_reso_knob.slider };
 
+    RotaryKnob filter_freq_knob;
+    SliderAttachment filter_freq_attachment { audioProcessor.apvts, ParameterId::filter_freq.getParamID(), filter_freq_knob.slider };
+
     juce::TextButton poly_mode_button;
     ButtonAttachment poly_mode_attachment { audioProcessor.apvts, ParameterId::poly_mode.getParamID(), poly_mode_button };
 
